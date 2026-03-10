@@ -7,7 +7,7 @@ pkgs.buildGoModule {
   pname = "niri-smart-workspace";
   version = "0.1.0";
 
-  src = ./.;
+  src = ../.;
 
   vendorHash = null;
 
