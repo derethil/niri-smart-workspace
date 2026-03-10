@@ -9,7 +9,7 @@ import (
 	"os/exec"
 )
 
-func InitializeState(isDebug bool) (*State, error) {
+func InitializeState() (*State, error) {
 	var workspaces []Workspace
 	var windows []Window
 
@@ -39,7 +39,7 @@ func InitializeState(isDebug bool) (*State, error) {
 		return nil, err
 	}
 
-	return NewState(isDebug, workspaces, windows), nil
+	return NewState(workspaces, windows), nil
 }
 
 func startEventListener(state *State) {
@@ -126,7 +126,9 @@ func runSocketServer(state *State) error {
 }
 
 func RunDaemon(isDebug bool) error {
-	state, err := InitializeState(isDebug)
+	SetDebugMode(isDebug)
+
+	state, err := InitializeState()
 	if err != nil {
 		return err
 	}

@@ -10,6 +10,10 @@ import (
 
 var debugMode bool
 
+func SetDebugMode(enabled bool) {
+	debugMode = enabled
+}
+
 func debug(format string, args ...any) {
 	if debugMode {
 		log.Printf(format, args...)

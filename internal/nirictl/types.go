@@ -38,17 +38,15 @@ type Event struct {
 
 type State struct {
 	mu         sync.RWMutex
-	isDebug    bool
 	workspaces []Workspace
 	windows    []Window
 }
 
-func NewState(isDebug bool, workspaces []Workspace, windows []Window) *State {
+func NewState(workspaces []Workspace, windows []Window) *State {
 	debug("[INIT] Loaded %d workspaces", len(workspaces))
 	debug("[INIT] Loaded %d windows", len(windows))
 
 	state := &State{
-		isDebug:    isDebug,
 		workspaces: workspaces,
 		windows:    windows,
 	}
