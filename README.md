@@ -9,7 +9,6 @@ Wayland compositor that automatically skips empty workspaces.
 - Runs as a background daemon listening to niri events to avoid fetching state
   on every invocation
 - Fast Unix socket IPC for navigation commands
-- Lightweight and written in Go
 
 ## How It Works
 
@@ -28,12 +27,27 @@ Navigation behavior:
 
 ### With Nix Flakes
 
-Add to your configuration:
+First add this flake to your inputs and import its module:
 
 ```nix
-programs.niri.enable = true;
+inputs = {
+    niri-smart-workspace = {
+        url = "github:derethil/niri-smart-workspace";
+    };
+};
 
-# The daemon will start automatically with your graphical session
+...
+
+imports = with inputs; [
+    niri-smart-workspace.homeManagerModules.default # or
+    niri-smart-workspace.nixosModules.default 
+];
+```
+
+Then enable the module to install the systemd service:
+
+```nix
+programs.niri-smart-workspace.enable = true;
 ```
 
 Then bind keys to the navigation commands, e.g.:
@@ -46,8 +60,7 @@ Then bind keys to the navigation commands, e.g.:
 ### From Source
 
 ```bash
-cd src
-go build -o niri-smart-workspace
+go build -o niri-smart-workspace ./main.go
 ```
 
 ## Usage
@@ -85,7 +98,3 @@ niri-smart-workspace --daemon --debug
 - Go 1.25+
 - niri compositor
 - Linux with systemd (for daemon management)
-
-## License
-
-MIT
