@@ -29,6 +29,7 @@
       }
     )
     // {
-      homeModules.default = ./nix/module.nix;
+      homeManagerModules.default = ./nix/home-manager-module.nix;
+      nixosModules.default = ./nix/nixos-module.nix;
     };
 }

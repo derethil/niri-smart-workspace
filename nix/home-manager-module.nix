@@ -8,7 +8,11 @@
 in {
   options.services.niri-smart-workspace = {
     enable = lib.mkEnableOption "niri-smart-workspace daemon";
-    package = lib.mkPackageOption pkgs "niri-smart-workspace" {};
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.callPackage ./package.nix {};
+      description = "The niri-smart-workspace package to use.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
