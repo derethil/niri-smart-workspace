@@ -14,7 +14,7 @@
     utils.lib.eachDefaultSystem (
       system: let
         pkgs = import nixpkgs {inherit system;};
-        niri-smart-workspace = pkgs.callPackage ./package.nix {};
+        niri-smart-workspace = pkgs.callPackage ./nix/package.nix {};
       in {
         packages.default = niri-smart-workspace;
         packages.niri-smart-workspace = niri-smart-workspace;
@@ -29,6 +29,6 @@
       }
     )
     // {
-      homeModules.default = ./module.nix;
+      homeModules.default = ./nix/module.nix;
     };
 }
