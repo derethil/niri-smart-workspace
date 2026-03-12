@@ -78,6 +78,14 @@ func startEventListener(state *State) {
 				debug("[EVENT] Workspace activated: id=%d, focused=%v", event.WorkspaceActivated.ID, event.WorkspaceActivated.Focused)
 				state.UpdateFocusedWorkspace(event.WorkspaceActivated.ID)
 			}
+			if event.WindowOpenedOrChanged != nil {
+				debug("[EVENT] Window opened/changed: id=%d workspace=%d", event.WindowOpenedOrChanged.Window.ID, event.WindowOpenedOrChanged.Window.WorkspaceID)
+				state.AddOrUpdateWindow(event.WindowOpenedOrChanged.Window)
+			}
+			if event.WindowClosed != nil {
+				debug("[EVENT] Window closed: id=%d", event.WindowClosed.ID)
+				state.RemoveWindow(event.WindowClosed.ID)
+			}
 		}
 	}()
 }

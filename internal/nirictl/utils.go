@@ -1,10 +1,8 @@
 package nirictl
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -26,9 +24,4 @@ func GetSocketPath() string {
 		runtime = "/tmp"
 	}
 	return filepath.Join(runtime, "niri-smart-workspace.sock")
-}
-
-func focusWorkspace(idx int) error {
-	cmd := exec.Command("niri", "msg", "action", "focus-workspace", fmt.Sprintf("%d", idx))
-	return cmd.Run()
 }

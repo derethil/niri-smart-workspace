@@ -2,6 +2,7 @@ package nirictl
 
 import (
 	"fmt"
+	"os/exec"
 	"sort"
 )
 
@@ -41,8 +42,14 @@ func filterWorkspacesByOutput(workspaces []Workspace, output string) []Workspace
 
 func buildWorkspacesWithWindowsMap(workspaces []Workspace, windows []Window) map[int]bool {
 	workspacesWithWindows := make(map[int]bool)
+	debug("[MAP] Building workspace map with %d windows:", len(windows))
+	for _, w := range windows {
+		debug("[MAP]   window id=%d workspace_id=%d", w.ID, w.WorkspaceID)
+	}
 	for _, ws := range workspaces {
-		if countWindowsOnWorkspace(ws.ID, windows) > 0 {
+		count := countWindowsOnWorkspace(ws.ID, windows)
+		debug("[MAP] Workspace id=%d idx=%d has %d windows", ws.ID, ws.Idx, count)
+		if count > 0 {
 			workspacesWithWindows[ws.Idx] = true
 		}
 	}
@@ -102,4 +109,9 @@ func navigate(direction string, workspaces []Workspace, windows []Window) error 
 		return handleUpWorkspace(currentWorkspace.Idx, outputWorkspaces, workspacesWithWindows)
 	}
 	return handleDownWorkspace(currentWorkspace.Idx, outputWorkspaces, workspacesWithWindows)
+}
+
+func focusWorkspace(idx int) error {
+	cmd := exec.Command("niri", "msg", "action", "focus-workspace", fmt.Sprintf("%d", idx))
+	return cmd.Run()
 }

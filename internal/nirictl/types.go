@@ -30,10 +30,20 @@ type WorkspaceActivatedEvent struct {
 	Focused bool `json:"focused"`
 }
 
+type WindowOpenedOrChangedEvent struct {
+	Window Window `json:"window"`
+}
+
+type WindowClosedEvent struct {
+	ID int `json:"id"`
+}
+
 type Event struct {
-	WorkspacesChanged  *WorkspacesChangedEvent  `json:"WorkspacesChanged"`
-	WindowsChanged     *WindowsChangedEvent     `json:"WindowsChanged"`
-	WorkspaceActivated *WorkspaceActivatedEvent `json:"WorkspaceActivated"`
+	WorkspacesChanged      *WorkspacesChangedEvent      `json:"WorkspacesChanged"`
+	WindowsChanged         *WindowsChangedEvent         `json:"WindowsChanged"`
+	WorkspaceActivated     *WorkspaceActivatedEvent     `json:"WorkspaceActivated"`
+	WindowOpenedOrChanged  *WindowOpenedOrChangedEvent  `json:"WindowOpenedOrChanged"`
+	WindowClosed           *WindowClosedEvent           `json:"WindowClosed"`
 }
 
 type State struct {
@@ -85,5 +95,28 @@ func (s *State) UpdateFocusedWorkspace(workspaceID int) {
 	for i := range s.workspaces {
 		s.workspaces[i].IsFocused = s.workspaces[i].ID == workspaceID
 		s.workspaces[i].IsActive = s.workspaces[i].ID == workspaceID
+	}
+}
+
+func (s *State) AddOrUpdateWindow(window Window) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.windows {
+		if s.windows[i].ID == window.ID {
+			s.windows[i] = window
+			return
+		}
+	}
+	s.windows = append(s.windows, window)
+}
+
+func (s *State) RemoveWindow(windowID int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.windows {
+		if s.windows[i].ID == windowID {
+			s.windows = append(s.windows[:i], s.windows[i+1:]...)
+			return
+		}
 	}
 }
