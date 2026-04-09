@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"net"
@@ -8,41 +9,45 @@ import (
 	"os"
 )
 
-func parseArgs() (isDebug, isDaemon bool, direction string) {
-	for _, arg := range os.Args[1:] {
-		if arg == "--debug" {
-			isDebug = true
-		} else if arg == "--daemon" {
-			isDaemon = true
-		} else if direction == "" {
-			direction = arg
-		}
+func fatalf(format string, args ...any) {
+	fmt.Fprintf(os.Stderr, format, args...)
+	if format[len(format)-1] != '\n' {
+		fmt.Fprintln(os.Stderr)
 	}
+	os.Exit(1)
+}
+
+func parseArgs() (isDebug, isDaemon bool, direction string, err error) {
+	flag.BoolVar(&isDebug, "debug", false, "enable debug logging")
+	flag.BoolVar(&isDaemon, "daemon", false, "run as daemon")
+	flag.Parse()
 
 	if isDaemon {
-		return isDebug, true, ""
+		return isDebug, true, "", nil
 	}
 
-	if direction == "" {
-		fmt.Fprintf(os.Stderr, "Usage: %s [--debug] <up|down>\n", os.Args[0])
-		os.Exit(1)
+	if flag.NArg() < 1 {
+		return false, false, "", fmt.Errorf("usage: %s [--debug] [--daemon] <up|down>", flag.Arg(0))
 	}
+
+	direction = flag.Arg(0)
 
 	if direction != "up" && direction != "down" {
-		fmt.Fprintf(os.Stderr, "Invalid argument: %s (must be 'up' or 'down')\n", direction)
-		os.Exit(1)
+		return false, false, "", fmt.Errorf("invalid argument: %s (must be 'up' or 'down')", direction)
 	}
 
-	return isDebug, false, direction
+	return isDebug, false, direction, nil
 }
 
 func main() {
-	isDebug, isDaemon, direction := parseArgs()
+	isDebug, isDaemon, direction, err := parseArgs()
+	if err != nil {
+		fatalf("%v", err)
+	}
 
 	if isDaemon {
 		if err := nirictl.RunDaemon(isDebug); err != nil {
-			fmt.Fprintf(os.Stderr, "Daemon error: %v\n", err)
-			os.Exit(1)
+			fatalf("daemon error: %v", err)
 		}
 		return
 	}
@@ -50,24 +55,20 @@ func main() {
 	socketPath := nirictl.GetSocketPath()
 	conn, err := net.Dial("unix", socketPath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: daemon not running (start with --daemon)\n")
-		os.Exit(1)
+		fatalf("daemon not running (start with --daemon)")
 	}
 	defer conn.Close()
 
 	if _, err := conn.Write([]byte(direction)); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
+		fatalf("failed to send command: %v", err)
 	}
 
 	response, err := io.ReadAll(conn)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
+		fatalf("failed to read response: %v", err)
 	}
 
 	if string(response) != "ok\n" {
-		fmt.Fprintf(os.Stderr, "%s", string(response))
-		os.Exit(1)
+		fatalf("%s", response)
 	}
 }
