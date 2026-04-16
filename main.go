@@ -27,7 +27,7 @@ func parseArgs() (isDebug, isDaemon bool, direction string, err error) {
 	}
 
 	if flag.NArg() < 1 {
-		return false, false, "", fmt.Errorf("usage: %s [--debug] [--daemon] <up|down>", flag.Arg(0))
+		return false, false, "", fmt.Errorf("usage: %s [--debug] [--daemon] <up|down>", os.Args[0])
 	}
 
 	direction = flag.Arg(0)
