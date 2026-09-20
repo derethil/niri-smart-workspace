@@ -21,7 +21,8 @@ in {
     systemd.user.services.niri-smart-workspace = {
       Unit = {
         Description = "Smart workspace navigation for niri";
-        After = ["graphical-session.target"];
+        After = ["graphical-session.target" "niri.service"];
+        PartOf = ["niri.service"];
       };
       Service = {
         ExecStart = "${lib.getExe cfg.package} --daemon";
